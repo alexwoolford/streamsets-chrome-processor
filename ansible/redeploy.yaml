@@ -1,0 +1,20 @@
+---
+# redeploy.yml
+
+- hosts: streamsets
+  user: root
+
+
+  tasks:
+      - name: rebuild jars
+        local_action: shell mvn clean package -DskipTests chdir=/Users/awoolford/streamsets-chrome-processor
+
+      - name: copy jar to streamsets
+        copy:
+          src: /Users/awoolford/streamsets-chrome-processor/target/streamsets-chrome-processor-1.0-SNAPSHOT.jar
+          dest: /opt/streamsets-datacollector/user-libs/streamsets-chrome-processor/lib/
+          force: yes
+
+      - name: restart sdc
+        service: name=sdc
+                 state=restarted
