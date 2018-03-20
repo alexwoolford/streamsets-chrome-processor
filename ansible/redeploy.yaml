@@ -1,18 +1,29 @@
 ---
 # redeploy.yml
 
-- hosts: streamsets
+- hosts: dpm
   user: root
-
+  vars:
+    remote_lib_path: /opt/streamsets-datacollector/user-libs/streamsets-chrome-processor/lib/
 
   tasks:
       - name: rebuild jars
-        local_action: shell mvn clean package -DskipTests chdir=/Users/awoolford/streamsets-chrome-processor
+        local_action: shell mvn clean package -DskipTests chdir=/Users/alexwoolford/streamsets-chrome-processor
+
+      - name: delete remote lib path
+        file:
+          path: "{{ remote_lib_path }}"
+          state: absent
+
+      - name: create remote lib path exists
+        file:
+          path: "{{ remote_lib_path }}"
+          state: directory
 
       - name: copy jar to streamsets
         copy:
-          src: /Users/awoolford/streamsets-chrome-processor/target/streamsets-chrome-processor-1.0-SNAPSHOT.jar
-          dest: /opt/streamsets-datacollector/user-libs/streamsets-chrome-processor/lib/
+          src: /Users/alexwoolford/streamsets-chrome-processor/target/streamsets-chrome-processor-1.0-SNAPSHOT.jar
+          dest: "{{ remote_lib_path }}"
           force: yes
 
       - name: restart sdc
